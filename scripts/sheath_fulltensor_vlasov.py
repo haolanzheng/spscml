@@ -4,6 +4,7 @@ sys.path.append("src")
 import jax.numpy as jnp
 import jax
 import matplotlib.pyplot as plt
+import time
 
 from spscml.poisson import poisson_solve
 from spscml.fulltensor_vlasov.solver import Solver
@@ -79,7 +80,11 @@ CFL = 0.5
 dt = CFL * x_grid.dx / (6*electron_grid.vmax)
 
 solve = jax.jit(lambda: solver.solve(dt, 10000, initial_conditions, boundary_conditions, 0.1))
+t1 = time.perf_counter()
 result = solve()
+t2 = time.perf_counter()
+
+print(f'runtime: {t2 - t1} seconds')
 
 fe = result['electron']
 fi = result['ion']

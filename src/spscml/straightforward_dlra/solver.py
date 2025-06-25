@@ -12,7 +12,7 @@ from ..poisson import poisson_solve
 from ..collisions_and_sources import collision_frequency_shape_func, flux_source_shape_func, maxwellian
 from .poisson import solve_poisson_KV, solve_poisson_XSV, solve_poisson_XL
 from ..utils import zeroth_moment
-from ..collisions_and_sources import maxwellian, maxwellianv
+from ..collisions_and_sources import maxwellianv, collision_frequency_shape_func
 
 SPECIES = ['electron', 'ion']
 
@@ -76,7 +76,11 @@ class Solver(eqx.Module):
         self.boundary_type = boundary_type
         self.As = {'electron': self.plasma.Ae, 'ion': self.plasma.Ai}
         self.Zs = {'electron': self.plasma.Ze, 'ion': self.plasma.Zi}
+        freq_shape_func = collision_frequency_shape_func(self.grids)
+        nu_ee *= freq_shape_func
+        nu_ii *= freq_shape_func
         self.nus = {'electron': nu_ee, 'ion': nu_ii}
+        
 
 
     def solve(self, dt, Nt, initial_conditions, boundary_conditions, dtmax):
@@ -218,7 +222,7 @@ class Solver(eqx.Module):
         E_term2 = V @ Dm_V.T * grid.dv
         E_flux = self.plasma.omega_c_tau * args['Z']/args['A'] * ( E_term1 @ (K @ jnp.diag(E_plus)) + E_term2 @ (K @ jnp.diag(E_minus)) )
         
-        nu = args['nu']
+        nu = args['nu'].reshape(1, -1)
         ns = (K.T @ zeroth_moment(V, grid)).reshape(1, -1)
         Mv  = maxwellianv(grid, args['A']).reshape(1, -1)
         
@@ -318,7 +322,7 @@ class Solver(eqx.Module):
         E_flux = self.plasma.omega_c_tau * args['Z']/args['A'] * ( X_term1 @ S @ V_term1.T + X_term2 @ S @ V_term2.T )
         gamma = args['flux_out']
         gamma *= jnp.maximum(flux_source_shape_func(grid), 0.0).reshape(1, -1)
-        nu    = args['nu']
+        nu    = args['nu'].reshape(1, -1)
         ns    = (X.T @ S @ zeroth_moment(V, grid)).reshape(1, -1)
         Mv    = maxwellianv(grid, args['A']).reshape(1, -1)
         # print(K.shape, ns.shape, gamma.shape, Mv.shape)
@@ -416,7 +420,7 @@ class Solver(eqx.Module):
         E_flux = self.plasma.omega_c_tau * args['Z'] / args['A'] * X @ (X @ jnp.diag(E_plus)).T * grid.dx @ Dp_L 
         E_flux += self.plasma.omega_c_tau * args['Z'] / args['A'] * X @ (X @ jnp.diag(E_minus)).T * grid.dx @ Dm_L
         
-        nu = args['nu']
+        nu = args['nu'].reshape(-1, 1)
         gamma = args['flux_out']
         gamma *= jnp.maximum(flux_source_shape_func(grid), 0.0).reshape(-1, 1)
         ns = X.T @ S @ zeroth_moment(V, grid).reshape(-1, 1)

@@ -14,7 +14,7 @@ from ..rk import rk1, ssprk2, imex_ssp2, imex_euler
 from ..muscl import slope_limited_flux_divergence
 from ..poisson import poisson_solve
 from ..utils import zeroth_moment, first_moment, second_moment
-from ..collisions_and_sources import flux_source_shape_func, maxwellian
+from ..collisions_and_sources import flux_source_shape_func, maxwellian, collision_frequency_shape_func
 
 class Solver(eqx.Module):
     plasma: TwoSpeciesPlasma
@@ -133,7 +133,7 @@ class Solver(eqx.Module):
         # HACKATHON: implement BGK collision term
         ns = zeroth_moment(f, grid)
         # ns = ns[:, None]
-        Qs = nu * (maxwellian(grid, A, ns) - f)
+        Qs = nu * collision_frequency_shape_func(self.grids)[:, None] * (maxwellian(grid, A, ns) - f)
 
         return -vdfdx - Edfdv + Qs
 
