@@ -209,7 +209,7 @@ class Solver(eqx.Module):
         # 2. BGK collision operator: nu * (M - f) where M is Maxwellian with density n
         # 3. Flux source terms for particle injection
         # See collision_frequency_shape_func, flux_source_shape_func, and maxwellian in collisions_and_sources.py
-        E = args['E'].reshape(-1)
+        E = args['E']
         Dp_V = jnp.diff(jnp.concatenate([jnp.zeros((V.shape[0], 1)), V], axis=1), axis=1) / grid.dv
         Dm_V = jnp.diff(jnp.concatenate([V, jnp.zeros((V.shape[0], 1))], axis=1), axis=1) / grid.dv
         E_plus  = jnp.where(args['Z'] * E > 0, E, 0.)
@@ -306,7 +306,7 @@ class Solver(eqx.Module):
         # 3. Flux source terms for particle injection
         # See collision_frequency_shape_func and flux_source_shape_func in collisions_and_sources.py
         
-        E = args['E'].reshape(-1)
+        E = args['E']
         Dp_V = jnp.diff(jnp.concatenate([jnp.zeros((V.shape[0], 1)), V], axis=1), axis=1) / grid.dv
         Dm_V = jnp.diff(jnp.concatenate([V, jnp.zeros((V.shape[0], 1))], axis=1), axis=1) / grid.dv
         E_plus  = jnp.where(args['Z'] * E > 0, E, 0.)
@@ -409,7 +409,7 @@ class Solver(eqx.Module):
         Dp_L = jnp.diff(jnp.concatenate([jnp.zeros((L.shape[0], 1)), L], axis=1), axis=1) / grid.dv
         Dm_L = jnp.diff(jnp.concatenate([L, jnp.zeros((L.shape[0], 1))], axis=1), axis=1) / grid.dv
         
-        E = args['E'].reshape(-1)
+        E = args['E']
         E_plus  = jnp.where(args['Z'] * E>0, E, 0.)
         E_minus = jnp.where(args['Z'] * E<0, E, 0.)
         
