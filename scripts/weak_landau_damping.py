@@ -47,9 +47,10 @@ def lowrank_factors(f, grid):
     return (X, S, V)
 
 ne = 1 + 0.01 * jnp.cos(electron_grid.xs / 2)
-initial_conditions = { 
-    'electron': lambda x, v: lowrank_factors(ne[:, None] / (jnp.sqrt(2*jnp.pi)*vte) * jnp.exp(-Ae*(v**2) / (2*Te)), electron_grid),
-    'ion': lambda x, v: lowrank_factors(1 / (jnp.sqrt(2*jnp.pi)*vti) * jnp.exp(-Ai*(v**2) / (2*Ti)), ion_grid)
+initial_conditions = { # 
+    'electron': lambda x, v:  lowrank_factors(ne[:, None] / (jnp.sqrt(2*jnp.pi)*vte) * jnp.exp(-Ae*(v**2) / (2*Te)), electron_grid),
+    # 
+    'ion': lambda x, v: lowrank_factors( 1 / (jnp.sqrt(2*jnp.pi)*vti) * jnp.exp(-Ai*(v**2) / (2*Ti)), ion_grid)
 }
 boundary_conditions = {
     'phi': 'periodic'
